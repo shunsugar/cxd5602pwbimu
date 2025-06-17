@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<package format="3">
+  <name>cxd5602pwbimu</name>
+  <version>0.0.0</version>
+  <description>ROS2 package for cxd5602pwbimu, a Multi-IMU for SONY SPRESENSE</description>
+  <maintainer email="shin.ioaoi@gmail.com">shunsugar</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>serial</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
