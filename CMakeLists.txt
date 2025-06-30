@@ -19,11 +19,11 @@ install(DIRECTORY include src
 
 # ---------- cpp ---------- #
 # Create cpp executable
-add_executable(imu_node1 src/imu_node1.cpp)
-ament_target_dependencies(imu_node1 rclcpp sensor_msgs serial)
+add_executable(imu_receiver_node src/imu_receiver_node.cpp)
+ament_target_dependencies(imu_receiver_node rclcpp sensor_msgs serial)
 
 # Install cpp executable
-install(TARGETS imu_node1
+install(TARGETS imu_receiver_node
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
