@@ -26,4 +26,12 @@ ament_target_dependencies(imu_receiver_node rclcpp sensor_msgs serial)
 install(TARGETS imu_receiver_node
   DESTINATION lib/${PROJECT_NAME})
 
+# Create cpp executable
+add_executable(imu_node2 src/imu_node2.cpp)
+ament_target_dependencies(imu_node2 rclcpp sensor_msgs serial)
+
+# Install cpp executable
+install(TARGETS imu_node2
+  DESTINATION lib/${PROJECT_NAME})
 ament_package()
+
