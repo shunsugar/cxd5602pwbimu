@@ -3,7 +3,7 @@
 <package format="3">
   <name>cxd5602pwbimu</name>
   <version>0.0.0</version>
-  <description>ROS2 package for cxd5602pwbimu, a Multi-IMU for SONY SPRESENSE</description>
+  <description>ROS2 package for cxd5602pwbimu, a Multi-IMU for SONY SPRESENSE.</description>
   <maintainer email="shin.ioaoi@gmail.com">shunsugar</maintainer>
   <license>Apache-2.0</license>
 
