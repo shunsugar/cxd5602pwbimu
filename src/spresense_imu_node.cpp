@@ -131,10 +131,10 @@ void SpresenseImuNode::publishMsg(const std::vector<float> & acceleration,
   imu_msg_.angular_velocity.x = angular_velocity[0];
   imu_msg_.angular_velocity.y = angular_velocity[1];
   imu_msg_.angular_velocity.z = angular_velocity[2];
-  imu_msg_.orientation.x = quaternion[0];
-  imu_msg_.orientation.y = quaternion[1];
-  imu_msg_.orientation.z = quaternion[2];
-  imu_msg_.orientation.w = quaternion[3];
+  imu_msg_.orientation.w = quaternion[0];
+  imu_msg_.orientation.x = quaternion[1];
+  imu_msg_.orientation.y = quaternion[2];
+  imu_msg_.orientation.z = quaternion[3];
   
   imu_pub_->publish(imu_msg_);
 }
