@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="port" default="/dev/sensors/Spresense_IMU"/>
+  <arg name="frame_id" default="imu_link"/>
+  <arg name="imu_topic" default="/imu/Spresense"/>
+  <arg name="time_out" default="10"/>
+  <arg name="baudrate" default="115200"/>
+
+  <!-- spresense imu node -->
+  <node pkg="cxd5602pwbimu" exec="spresense_imu_node">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <param name="port" value="$(var port)"/>
+    <param name="frame_id" value="$(var frame_id)"/>
+    <param name="imu_topic" value="$(var imu_topic)"/>
+    <param name="time_out" value="$(var time_out)"/>
+    <param name="baudrate" value="$(var baudrate)"/>
+  </node>
+
+  <!-- Rviz 
+  <arg name="rviz_config" default="$(find-pkg-share icm_20948)/rviz2/imu.rviz"/>
+  <node pkg="rviz2" exec="rviz2" args="-d $(var rviz_config)"/>-->
+</launch>
