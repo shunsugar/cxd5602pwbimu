@@ -13,7 +13,7 @@ include_directories(
 )
 
 # install
-install(DIRECTORY include launch src
+install(DIRECTORY config include launch src
   DESTINATION share/${PROJECT_NAME}/)
 
 # ---------- cpp ---------- #
