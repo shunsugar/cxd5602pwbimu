@@ -5,7 +5,7 @@ using namespace std::chrono_literals;
 /* ---------- ctor / dtor -------------------------------------------------- */
 SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
 {
-  declare_parameter("port",      "/dev/sensors/Spresense_IMU");
+  declare_parameter("port",      "/dev/sensors/spresense_imu");
   declare_parameter("frame_id",  "imu_link");
   declare_parameter("imu_topic", "/imu/spresense");
   declare_parameter("time_out",  10.0f);
