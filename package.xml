@@ -12,6 +12,8 @@
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
   <depend>serial</depend>
+  
+  <exec_depend>imu_filter_madgwick</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

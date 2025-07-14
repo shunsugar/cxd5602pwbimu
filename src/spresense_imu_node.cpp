@@ -1,151 +1,126 @@
 #include "spresense_imu_node.hpp"
+#include <array>
+using namespace std::chrono_literals;
 
+/* ---------- ctor / dtor -------------------------------------------------- */
 SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
 {
-  this->declare_parameter<std::string>("port", "/dev/sensors/Spresense_IMU");
-  this->declare_parameter<std::string>("frame_id", "imu_link");
-  this->declare_parameter<std::string>("imu_topic", "/imu/Spresense");
-  this->declare_parameter<float>("time_out", 10);
-  this->declare_parameter<int>("baudrate", 115200);
-  this->get_parameter("port", port_);
-  this->get_parameter("frame_id", frame_id_);
-  this->get_parameter("imu_topic", imu_topic_);
-  this->get_parameter("time_out", time_out_);
-  this->get_parameter("baudrate", baudrate_);
+  declare_parameter("port",      "/dev/sensors/Spresense_IMU");
+  declare_parameter("frame_id",  "imu_link");
+  declare_parameter("imu_topic", "/imu/spresense");
+  declare_parameter("time_out",  10.0f);
+  declare_parameter("baudrate",  921600);
 
-  imu_pub_ = this->create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 10);
-  timer_ = this->create_wall_timer(2ms, std::bind(&SpresenseImuNode::controlLoop, this));
+  get_parameter("port",      port_);
+  get_parameter("frame_id",  frame_id_);
+  get_parameter("imu_topic", imu_topic_);
+  get_parameter("time_out",  time_out_);
+  get_parameter("baudrate",  baudrate_);
 
-  RCLCPP_INFO(this->get_logger(), "Initialized spresense_imu_node");
+  imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 50);
+  timer_   = create_wall_timer(1ms, std::bind(&SpresenseImuNode::controlLoop, this));
+
+  RCLCPP_INFO(get_logger(), "Init port=%s baud=%d", port_.c_str(), baudrate_);
   openSerial(port_, baudrate_, time_out_);
 }
 
 SpresenseImuNode::~SpresenseImuNode()
 {
-  if (imu_serial_.isOpen()) {
-    imu_serial_.close();
-  }
+  if (imu_serial_.isOpen()) imu_serial_.close();
 }
 
-void SpresenseImuNode::openSerial(const std::string & port, const int & baudrate, const float & time_out)
+/* ---------- シリアルオープン ------------------------------------------- */
+void SpresenseImuNode::openSerial(const std::string& port, const int& baud, const float&)
 {
-  RCLCPP_INFO(this->get_logger(), "Port: %s, baud: %d", port.c_str(), baudrate);
   serial::Timeout to = serial::Timeout::simpleTimeout(10);
-
-  while (rclcpp::ok()) {
+  while (rclcpp::ok())
+  {
     try {
-      // Attempt to open the serial port
-      imu_serial_.setPort(port);
-      imu_serial_.setBaudrate(baudrate);
-      imu_serial_.setTimeout(to);
-      imu_serial_.open();
-      RCLCPP_INFO(this->get_logger(), "Serial port opened successfully");
+      imu_serial_.setPort(port); imu_serial_.setBaudrate(baud); imu_serial_.setTimeout(to);
+      imu_serial_.open();  RCLCPP_INFO(get_logger(), "Serial opened.");
       break;
-    }
-    catch (serial::IOException& e) {
-      RCLCPP_WARN(this->get_logger(), "Serial port opening failure... Retrying");
-      rclcpp::sleep_for(5s);
+    } catch (serial::IOException&) {
+      RCLCPP_WARN(get_logger(), "Serial open failed… retry in 5s"); rclcpp::sleep_for(5s);
     }
   }
 }
 
+/* ---------- タイマループ ------------------------------------------------- */
 void SpresenseImuNode::controlLoop()
 {
-  try {
-    if (imu_serial_.available()) {
-      std::vector<uint8_t> buff_data;
-      imu_serial_.read(buff_data, imu_serial_.available());
-      for (const auto & byte : buff_data) {
-        processData(byte);
-      }
-    }
-  }
-  catch (const std::exception & e) {
-    RCLCPP_WARN(this->get_logger(), "IMU disconnect... Retrying");
-    openSerial(port_, baudrate_, time_out_);
-  }
+  if (!imu_serial_.isOpen()) return;
+
+  size_t avail = imu_serial_.available();
+  if (!avail) return;
+
+  std::vector<uint8_t> tmp(avail);
+  imu_serial_.read(tmp, avail);
+  for (uint8_t b : tmp) processByte(b);
 }
 
-void SpresenseImuNode::processData(const uint8_t & raw_data)
+/* ---------- 1バイトずつパース ------------------------------------------ */
+void SpresenseImuNode::processByte(uint8_t byte)
 {
-  buff_.push_back(raw_data);
-  
-  if (buff_[0] != HEADER_BYTE) {
-    buff_.clear();
-    return;
+  buf_.push_back(byte);
+
+  /* 先頭同期 */
+  if (buf_.size() == 1 && buf_[0] != HEADER_BYTE) { buf_.clear(); return; }
+
+  /* サイズ不足 */
+  if (buf_.size() < PKT_SIZE) return;
+
+  /* 34byte 以上溜まっている場合の冗長分は先頭を詰める */
+  if (buf_.size() > PKT_SIZE) { buf_.erase(buf_.begin(), buf_.end() - PKT_SIZE); }
+
+  /* チェックサム検証 */
+  if (xor_checksum(buf_.data(), CHECK_IDX) != buf_[CHECK_IDX]) {
+    RCLCPP_DEBUG(get_logger(), "CRC fail");
+    buf_.clear(); return;
   }
-  
-  if (buff_.size() < BUFFER_SIZE) {
-    return;
-  }
-  
-  uint8_t checksum = 0;
-  for (size_t i = 1; i < BUFFER_SIZE - 1; ++i) {
-    checksum ^= buff_[i];
-  }
-  
-  if (checksum != buff_[BUFFER_SIZE - 1]) {
-    RCLCPP_WARN(this->get_logger(), "Checksum error");
-    buff_.erase(buff_.begin());
-    return;
-  }
-  
-  int16_t data[10];
-  for (int i = 0; i < 10; ++i) {
-    data[i] = static_cast<int16_t>(buff_[2 * i + 2] << 8 | buff_[2 * i + 1]);
-  }
-  
-  acceleration_ = {
-    data[0] * ACC_SCALE,
-    data[1] * ACC_SCALE,
-    data[2] * ACC_SCALE
-  };
-  
-  angular_velocity_ = {
-    data[3] * GYR_SCALE,
-    data[4] * GYR_SCALE,
-    data[5] * GYR_SCALE
-  };
-  
-  quaternion_ = {
-    data[6] * QUAT_SCALE,
-    data[7] * QUAT_SCALE,
-    data[8] * QUAT_SCALE,
-    data[9] * QUAT_SCALE
-  };
-  
-  publishMsg(acceleration_, angular_velocity_, quaternion_);
-  
-  buff_.clear();
+
+  /* ---------- データ展開 ---------- */
+  /* buf_[1] 〜 buf_[32] が imu_raw32_t */
+  /* フォーマット: <Ifffffff (ts,temp,gx,gy,gz,ax,ay,az) */
+  static_assert(PAYLOAD_SIZE == 28);
+  struct Payload {
+    uint32_t ts; float gx, gy, gz, ax, ay, az;
+  } __attribute__((packed));
+  Payload p;
+  memcpy(&p, &buf_[1], sizeof(p));
+
+  float acc[3] = { p.ax, p.ay, p.az };
+  float gyr[3] = { p.gx, p.gy, p.gz };            // 既に rad/s ならそのまま
+
+  publishImu(acc, gyr);
+  buf_.clear();
 }
 
-void SpresenseImuNode::publishMsg(const std::vector<float> & acceleration,
-                          const std::vector<float> & angular_velocity,
-                          const std::vector<float> & quaternion)
+/* ---------- Publish ----------------------------------------------------- */
+void SpresenseImuNode::publishImu(const float acc[3], const float gyr[3])
 {
-  imu_msg_.header.stamp = this->get_clock()->now();
-  imu_msg_.header.frame_id = frame_id_;
-  imu_msg_.linear_acceleration.x = acceleration[0];
-  imu_msg_.linear_acceleration.y = acceleration[1];
-  imu_msg_.linear_acceleration.z = acceleration[2];
-  imu_msg_.angular_velocity.x = angular_velocity[0];
-  imu_msg_.angular_velocity.y = angular_velocity[1];
-  imu_msg_.angular_velocity.z = angular_velocity[2];
-  imu_msg_.orientation.w = quaternion[0];
-  imu_msg_.orientation.x = quaternion[1];
-  imu_msg_.orientation.y = quaternion[2];
-  imu_msg_.orientation.z = quaternion[3];
-  
-  imu_pub_->publish(imu_msg_);
+  auto& msg = imu_msg_;
+  msg.header.stamp = now(); msg.header.frame_id = frame_id_;
+
+  msg.linear_acceleration.x = acc[0];
+  msg.linear_acceleration.y = acc[1];
+  msg.linear_acceleration.z = acc[2];
+
+  msg.angular_velocity.x = gyr[0];
+  msg.angular_velocity.y = gyr[1];
+  msg.angular_velocity.z = gyr[2];
+
+  /* orientation 不明なら無効化 */
+  msg.orientation_covariance[0] = -1;
+
+  imu_pub_->publish(msg);
 }
 
-int main(int argc, char *argv[])
+/* ---------- main -------------------------------------------------------- */
+int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<SpresenseImuNode>();
-  while (rclcpp::ok()) {
-    node->controlLoop();
-  }
+  rclcpp::spin(std::make_shared<SpresenseImuNode>());
   rclcpp::shutdown();
   return 0;
 }
+

@@ -1,48 +1,46 @@
-#ifndef SPRESENSE_IMU_NODE_HPP
-#define SPRESENSE_IMU_NODE_HPP
-
+#pragma once
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <serial/serial.h>
-#include <chrono>
-
-using namespace std::chrono_literals;
 
 class SpresenseImuNode : public rclcpp::Node
 {
 public:
   SpresenseImuNode();
   ~SpresenseImuNode();
-  void controlLoop();
-  void openSerial(const std::string & port, const int & baudrate, const float & time_out);
-
-  std::string port_;
-  int baudrate_;
-  float time_out_;
 
 private:
-  void processData(const uint8_t & raw_data);
-  void publishMsg(const std::vector<float> & acceleration,
-                  const std::vector<float> & angular_velocity,
-                  const std::vector<float> & quaternion);
+  /* ------ パラメータ ------- */
+  std::string port_, frame_id_, imu_topic_;
+  float  time_out_;
+  int    baudrate_;
 
+  /* ------ 定数 ------- */
+  static constexpr uint8_t HEADER_BYTE  = 0x55;
+  static constexpr size_t  PKT_SIZE     = 30;          // 0x55 + 32 + CRC
+  static constexpr size_t  PAYLOAD_SIZE = 28;          // imu_raw32_t
+  static constexpr size_t  CHECK_IDX    = 29;          // CRC
+  static constexpr double  DEG2RAD      = M_PI / 180.0;
+
+  /* ------ ハード／ROS リソース ------- */
+  serial::Serial                       imu_serial_;
+  rclcpp::TimerBase::SharedPtr         timer_;
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
-  rclcpp::TimerBase::SharedPtr timer_;
+  sensor_msgs::msg::Imu                imu_msg_;
 
-  sensor_msgs::msg::Imu imu_msg_;
-  serial::Serial imu_serial_;
-  std::string frame_id_;
-  std::string imu_topic_;
-  std::vector<uint8_t> buff_;
-  std::vector<float> acceleration_;
-  std::vector<float> angular_velocity_;
-  std::vector<float> quaternion_;
+  /* ------ 受信バッファ ------- */
+  std::vector<uint8_t> buf_;
 
-  const size_t BUFFER_SIZE = 22;
-  const uint8_t HEADER_BYTE = 0x55;
-  const float ACC_SCALE = 9.80665f / 8192.0f;
-  const float GYR_SCALE = (M_PI / 180.0f) / 65.536f;
-  const float QUAT_SCALE = 1.0f / 10000.0f;
+  /* ------ 内部処理 ------- */
+  void openSerial(const std::string&, const int&, const float&);
+  void controlLoop();
+  void processByte(uint8_t byte);
+  void publishImu(const float acc[3], const float gyr[3]);
+
+  /* ------ ヘルパ ------- */
+  static uint8_t xor_checksum(const uint8_t* data, size_t len)
+  {
+    uint8_t c = 0; while (len--) c ^= *data++; return c;
+  }
 };
 
-#endif // SPRESENSE_IMU_NODE_HPP

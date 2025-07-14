@@ -1,0 +1,7 @@
+madgwick_filter:
+  ros__parameters:
+    use_mag:      false
+    publish_tf:   false
+    world_frame:  nwu       # enu nwu
+    frequency:    480.0     # Hz
+    beta:         0.05
