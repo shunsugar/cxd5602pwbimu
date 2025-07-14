@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="use_sim_time" default="true"/>
+  <arg name="use_sim_time" default="false"/>
   <arg name="port" default="/dev/sensors/Spresense_IMU"/>
   <arg name="frame_id" default="imu_link"/>
-  <arg name="imu_topic" default="/imu/Spresense"/>
-  <arg name="time_out" default="10"/>
-  <arg name="baudrate" default="115200"/>
+  <arg name="imu_topic" default="/imu/spresense"/>
+  <arg name="time_out" default="10.0"/>
+  <arg name="baudrate" default="921600"/>
 
   <!-- spresense imu node -->
   <node pkg="cxd5602pwbimu" exec="spresense_imu_node">
@@ -17,7 +17,9 @@
     <param name="baudrate" value="$(var baudrate)"/>
   </node>
 
-  <!-- Rviz 
-  <arg name="rviz_config" default="$(find-pkg-share icm_20948)/rviz2/imu.rviz"/>
-  <node pkg="rviz2" exec="rviz2" args="-d $(var rviz_config)"/>-->
+  <!-- madgwick filter node -->
+  <node pkg="imu_filter_madgwick" exec="imu_filter_madgwick_node" name="madgwick_filter">
+    <param from="$(find-pkg-share cxd5602pwbimu)/config/madgwick.yaml"/>
+    <remap from="/imu/data_raw" to="$(var imu_topic)"/>
+  </node>
 </launch>
