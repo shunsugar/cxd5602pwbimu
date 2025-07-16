@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="use_sim_time" default="false"/>
-  <arg name="port" default="/dev/sensors/Spresense_IMU"/>
+  <arg name="port" default="/dev/sensors/spresense_imu"/>
   <arg name="frame_id" default="imu_link"/>
   <arg name="imu_topic" default="/imu/spresense"/>
   <arg name="time_out" default="10.0"/>

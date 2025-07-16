@@ -8,7 +8,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   declare_parameter("port",      "/dev/sensors/spresense_imu");
   declare_parameter("frame_id",  "imu_link");
   declare_parameter("imu_topic", "/imu/spresense");
-  declare_parameter("time_out",  10.0f);
+  declare_parameter("time_out",  10.0);
   declare_parameter("baudrate",  921600);
 
   get_parameter("port",      port_);
@@ -17,7 +17,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   get_parameter("time_out",  time_out_);
   get_parameter("baudrate",  baudrate_);
 
-  imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 50);
+  imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 10);
   timer_   = create_wall_timer(1ms, std::bind(&SpresenseImuNode::controlLoop, this));
 
   RCLCPP_INFO(get_logger(), "Init port=%s baud=%d", port_.c_str(), baudrate_);
