@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
   <arg name="use_sim_time" default="false"/>
+  <arg name="use_madgwick" default="true"/>
   <arg name="port" default="/dev/sensors/spresense_imu"/>
   <arg name="frame_id" default="imu_link"/>
   <arg name="imu_topic" default="/imu/spresense"/>
@@ -8,7 +9,7 @@
   <arg name="baudrate" default="921600"/>
 
   <!-- spresense imu node -->
-  <node pkg="cxd5602pwbimu" exec="spresense_imu_node">
+  <node pkg="cxd5602pwbimu" exec="cxd5602pwbimu_node">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="port" value="$(var port)"/>
     <param name="frame_id" value="$(var frame_id)"/>
@@ -18,8 +19,10 @@
   </node>
 
   <!-- madgwick filter node -->
-  <node pkg="imu_filter_madgwick" exec="imu_filter_madgwick_node" name="madgwick_filter">
-    <param from="$(find-pkg-share cxd5602pwbimu)/config/madgwick.yaml"/>
-    <remap from="/imu/data_raw" to="$(var imu_topic)"/>
-  </node>
+  <group if="$(var use_madgwick)">
+    <node pkg="imu_filter_madgwick" exec="imu_filter_madgwick_node" name="madgwick_filter">
+      <param from="$(find-pkg-share cxd5602pwbimu)/config/madgwick.yaml"/>
+      <remap from="/imu/data_raw" to="$(var imu_topic)"/>
+    </node>
+  </group>
 </launch>
