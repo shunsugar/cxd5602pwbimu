@@ -1,4 +1,4 @@
-#include "spresense_imu_node.hpp"
+#include "cxd5602pwbimu/cxd5602pwbimu_node.hpp"
 #include <array>
 using namespace std::chrono_literals;
 
@@ -123,4 +123,3 @@ int main(int argc, char** argv)
   rclcpp::shutdown();
   return 0;
 }
-

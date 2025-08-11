@@ -23,15 +23,15 @@ install(DIRECTORY config include launch src
 
 # ---------- cpp ---------- #
 # Create cpp executable
-add_executable(spresense_imu_node src/spresense_imu_node.cpp)
-ament_target_dependencies(spresense_imu_node rclcpp sensor_msgs serial)
+add_executable(cxd5602pwbimu_node src/driver/cxd5602pwbimu_node.cpp)
+ament_target_dependencies(cxd5602pwbimu_node rclcpp sensor_msgs serial)
 
 # Install cpp executable
-install(TARGETS spresense_imu_node
+install(TARGETS cxd5602pwbimu_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Create cpp executable
-add_executable(wheel_spimu_odom src/wheel_spimu_odom.cpp)
+add_executable(wheel_spimu_odom src/processor/wheel_spimu_odom.cpp)
 ament_target_dependencies(wheel_spimu_odom
   rclcpp
   sensor_msgs
@@ -47,7 +47,7 @@ install(TARGETS wheel_spimu_odom
   DESTINATION lib/${PROJECT_NAME})
 
 # Create cpp executable
-add_executable(gyrobias_estimation src/gyrobias_estimation.cpp)
+add_executable(gyrobias_estimation src/processor/gyrobias_estimation.cpp)
 ament_target_dependencies(gyrobias_estimation rclcpp sensor_msgs)
 
 # Install cpp executable
@@ -55,7 +55,7 @@ install(TARGETS gyrobias_estimation
   DESTINATION lib/${PROJECT_NAME})
 
 # Create cpp executable
-add_executable(gyrobias_corrector src/gyrobias_corrector.cpp)
+add_executable(gyrobias_corrector src/processor/gyrobias_corrector.cpp)
 ament_target_dependencies(gyrobias_corrector rclcpp sensor_msgs)
 
 # Install cpp executable
@@ -63,7 +63,7 @@ install(TARGETS gyrobias_corrector
   DESTINATION lib/${PROJECT_NAME})
 
 # Create cpp executable
-add_executable(initial_yaw_corrector src/initial_yaw_corrector.cpp)
+add_executable(initial_yaw_corrector src/processor/initial_yaw_corrector.cpp)
 ament_target_dependencies(initial_yaw_corrector rclcpp sensor_msgs tf2_geometry_msgs)
 
 # Install cpp executable
