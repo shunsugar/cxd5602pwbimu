@@ -1,4 +1,4 @@
-#include "wheel_spimu_odom.hpp"
+#include "cxd5602pwbimu/wheel_spimu_odom.hpp"
 
 OdomFusionNode::OdomFusionNode() : Node("wheel_spimu_odom")
 {
