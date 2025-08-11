@@ -43,4 +43,3 @@ private:
     uint8_t c = 0; while (len--) c ^= *data++; return c;
   }
 };
-

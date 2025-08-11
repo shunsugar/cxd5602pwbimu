@@ -23,11 +23,11 @@ install(DIRECTORY config include launch src
 
 # ---------- cpp ---------- #
 # Create cpp executable
-add_executable(spresense_imu_node src/spresense_imu_node.cpp)
-ament_target_dependencies(spresense_imu_node rclcpp sensor_msgs serial)
+add_executable(cxd5602pwbimu_node src/cxd5602pwbimu_node.cpp)
+ament_target_dependencies(cxd5602pwbimu_node rclcpp sensor_msgs serial)
 
 # Install cpp executable
-install(TARGETS spresense_imu_node
+install(TARGETS cxd5602pwbimu_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Create cpp executable
