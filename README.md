@@ -4,8 +4,8 @@
 
 ROS2 package for [CXD5602PWBIMU](https://developer.sony.com/ja/spresense/specifications), a Multi-IMU for Sony Spresense.
 
-## How to use
-### Setup
+## How to use 🔍
+### Setup ⚙️
 ```bash
 cd ~/ros2_ws/src
 git clone https://github.com/shunsugar/cxd5602pwbimu.git
@@ -17,7 +17,7 @@ colcon build
 source install/setup.bash
 ```
 
-### Run
+### Run 🚀
 ```
 # Run node directly
 ros2 run cxd5602pwbimu cxd5602pwbimu_node
@@ -29,5 +29,5 @@ ros2 launch cxd5602pwbimu cxd5602pwbimu.launch.xml use_madgwick:=false
 ros2 launch cxd5602pwbimu cxd5602pwbimu.launch.xml use_madgwick:=true
 ```
 
-## License
+## License 🪪
 Apache License 2.0 - see [LICENSE](https://github.com/shunsugar/cxd5602pwbimu?tab=Apache-2.0-1-ov-file) for details.
