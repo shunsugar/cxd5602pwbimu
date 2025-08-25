@@ -41,14 +41,14 @@
     <param name="odom_header_frame" value="odom"/>
     <param name="odom_child_frame" value="base_footprint"/>
   </node>
-  <!-- estop  
+  <!-- estop -->
   <node pkg="estop_ros" exec="cmd_vel_override_node" output="screen">
     <param name="port" value="/dev/sensors/estop"/>
     <param name="baudrate" value="115200"/>
     <param name="time_out" value="500"/>
     <param name="serial_interval" value="0.01"/>
     <remap from="/estop/state" to="/estop"/>
-  </node>-->
+  </node>
 
   <!-- imu -->
   <include file="$(find-pkg-share icm_20948)/launch/run.launch.xml">
@@ -61,13 +61,26 @@
   </include>
 
   <!-- spresense imu -->
-  <node pkg="cxd5602pwbimu" exec="spresense_imu_node">
+  <node pkg="cxd5602pwbimu" exec="cxd5602pwbimu_node">
     <param name="port" value="/dev/sensors/spresense_imu"/>
     <param name="frame_id" value="imu_link"/>
     <param name="imu_topic" value="/imu/spresense"/>
     <param name="time_out" value="10.0"/>
     <param name="baudrate" value="921600"/>
   </node>
+
+  <!-- GPSposition_publisher -->
+  <!-- initial heading:housei nakaniwa=179.169287 tsukuba= 276.5 -->
+  <!-- GPSheading_publisher -->
+  <node pkg="orange_gnss" exec="gnss_odom_movingbase_fix_publisher_ttyUSB" output="screen">
+    <param name="port" value="/dev/sensors/GNSS_UM982"/>
+    <param name="baud" value="115200"/>
+    <param name="country_id" value="0"/>
+    <param name="Position_magnification" value="1.675"/>
+    <param name="heading" value="0.0"/>
+    <param name="time_out" value="1.0"/>
+  </node>
+  <node pkg="navigation_control" exec="gps_waypoint" output="screen"/>
 
   <!-- mid360 -->
   <include file="$(find-pkg-share livox_ros_driver2)/launch_ROS2/msg_MID360_launch.py"/>
