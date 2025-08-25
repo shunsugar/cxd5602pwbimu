@@ -25,7 +25,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   declare_parameter("frame_id",  "imu_link");
   declare_parameter("imu_topic", "/imu/spresense");
   declare_parameter("time_out",  10.0);
-  declare_parameter("baudrate",  921600);
+  declare_parameter("baudrate",  460800);
 
   get_parameter("port",      port_);
   get_parameter("frame_id",  frame_id_);
@@ -36,7 +36,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 10);
   timer_   = create_wall_timer(1ms, std::bind(&SpresenseImuNode::controlLoop, this));
 
-  RCLCPP_INFO(get_logger(), "Init port=%s baud=%d", port_.c_str(), baudrate_);
+  RCLCPP_INFO(this->get_logger(), "Port:%s baud:%d", port.c_str(), baudrate_);
   openSerial(port_, baudrate_, time_out_);
 }
 
@@ -45,7 +45,6 @@ SpresenseImuNode::~SpresenseImuNode()
   if (imu_serial_.isOpen()) imu_serial_.close();
 }
 
-/* ---------- シリアルオープン ------------------------------------------- */
 void SpresenseImuNode::openSerial(const std::string& port, const int& baud, const float&)
 {
   serial::Timeout to = serial::Timeout::simpleTimeout(10);
@@ -53,7 +52,8 @@ void SpresenseImuNode::openSerial(const std::string& port, const int& baud, cons
   {
     try {
       imu_serial_.setPort(port); imu_serial_.setBaudrate(baud); imu_serial_.setTimeout(to);
-      imu_serial_.open();  RCLCPP_INFO(get_logger(), "Serial opened.");
+      imu_serial_.open();
+      RCLCPP_INFO(this->get_logger(), "\033[32mSerial port opened successfully!\033[0m");
       break;
     } catch (serial::IOException&) {
       RCLCPP_WARN(get_logger(), "Serial open failed… retry in 5s"); rclcpp::sleep_for(5s);
@@ -61,7 +61,6 @@ void SpresenseImuNode::openSerial(const std::string& port, const int& baud, cons
   }
 }
 
-/* ---------- タイマループ ------------------------------------------------- */
 void SpresenseImuNode::controlLoop()
 {
   if (!imu_serial_.isOpen()) return;
@@ -74,29 +73,21 @@ void SpresenseImuNode::controlLoop()
   for (uint8_t b : tmp) processByte(b);
 }
 
-/* ---------- 1バイトずつパース ------------------------------------------ */
 void SpresenseImuNode::processByte(uint8_t byte)
 {
   buf_.push_back(byte);
 
-  /* 先頭同期 */
   if (buf_.size() == 1 && buf_[0] != HEADER_BYTE) { buf_.clear(); return; }
 
-  /* サイズ不足 */
   if (buf_.size() < PKT_SIZE) return;
 
-  /* 34byte 以上溜まっている場合の冗長分は先頭を詰める */
   if (buf_.size() > PKT_SIZE) { buf_.erase(buf_.begin(), buf_.end() - PKT_SIZE); }
 
-  /* チェックサム検証 */
   if (xor_checksum(buf_.data(), CHECK_IDX) != buf_[CHECK_IDX]) {
     RCLCPP_DEBUG(get_logger(), "CRC fail");
     buf_.clear(); return;
   }
 
-  /* ---------- データ展開 ---------- */
-  /* buf_[1] 〜 buf_[32] が imu_raw32_t */
-  /* フォーマット: <Ifffffff (ts,temp,gx,gy,gz,ax,ay,az) */
   static_assert(PAYLOAD_SIZE == 28);
   struct Payload {
     uint32_t ts; float gx, gy, gz, ax, ay, az;
@@ -105,13 +96,12 @@ void SpresenseImuNode::processByte(uint8_t byte)
   memcpy(&p, &buf_[1], sizeof(p));
 
   float acc[3] = { p.ax, p.ay, p.az };
-  float gyr[3] = { p.gx, p.gy, p.gz };            // 既に rad/s ならそのまま
+  float gyr[3] = { p.gx, p.gy, p.gz };
 
   publishImu(acc, gyr);
   buf_.clear();
 }
 
-/* ---------- Publish ----------------------------------------------------- */
 void SpresenseImuNode::publishImu(const float acc[3], const float gyr[3])
 {
   auto& msg = imu_msg_;
@@ -125,13 +115,11 @@ void SpresenseImuNode::publishImu(const float acc[3], const float gyr[3])
   msg.angular_velocity.y = gyr[1];
   msg.angular_velocity.z = gyr[2];
 
-  /* orientation 不明なら無効化 */
   msg.orientation_covariance[0] = -1;
 
   imu_pub_->publish(msg);
 }
 
-/* ---------- main -------------------------------------------------------- */
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
