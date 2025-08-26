@@ -52,4 +52,13 @@ private:
   {
     uint8_t c = 0; while (len--) c ^= *data++; return c;
   }
+
+  bool gyro_bias_correction_;
+  bool bias_computed_;
+  int  sample_count_;
+  int  samples_received_;
+  std::array<double, 3> gyro_sum_{0.0, 0.0, 0.0};
+  std::array<double, 3> gyro_bias_{0.0, 0.0, 0.0};
+  std::array<double, 3> min_gyro_{ {1e9, 1e9, 1e9} };
+  std::array<double, 3> max_gyro_{ {-1e9, -1e9, -1e9} };
 };

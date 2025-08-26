@@ -18,14 +18,16 @@
 #include <array>
 using namespace std::chrono_literals;
 
-/* ---------- ctor / dtor -------------------------------------------------- */
 SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
 {
   declare_parameter("port",      "/dev/sensors/spresense_imu");
   declare_parameter("frame_id",  "imu_link");
-  declare_parameter("imu_topic", "/imu/spresense");
+  declare_parameter("imu_topic", "/imu/spresense/data_raw");
   declare_parameter("time_out",  10.0);
   declare_parameter("baudrate",  460800);
+
+  declare_parameter("gyro_bias_correction", true);
+  declare_parameter("gyro_bias_samples",    2400);
 
   get_parameter("port",      port_);
   get_parameter("frame_id",  frame_id_);
@@ -33,10 +35,16 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   get_parameter("time_out",  time_out_);
   get_parameter("baudrate",  baudrate_);
 
+  get_parameter("gyro_bias_correction", gyro_bias_correction_);
+  get_parameter("gyro_bias_samples",    sample_count_);
+
   imu_pub_ = create_publisher<sensor_msgs::msg::Imu>(imu_topic_, 10);
   timer_   = create_wall_timer(1ms, std::bind(&SpresenseImuNode::controlLoop, this));
 
-  RCLCPP_INFO(this->get_logger(), "Port:%s baud:%d", port.c_str(), baudrate_);
+  RCLCPP_INFO(this->get_logger(), "Port:%s baud:%d", port_.c_str(), baudrate_);
+  if (gyro_bias_correction_) {
+    RCLCPP_INFO(this->get_logger(), "Gyro bias correction enabled (samples:%d)", sample_count_);
+  }
   openSerial(port_, baudrate_, time_out_);
 }
 
@@ -78,9 +86,7 @@ void SpresenseImuNode::processByte(uint8_t byte)
   buf_.push_back(byte);
 
   if (buf_.size() == 1 && buf_[0] != HEADER_BYTE) { buf_.clear(); return; }
-
   if (buf_.size() < PKT_SIZE) return;
-
   if (buf_.size() > PKT_SIZE) { buf_.erase(buf_.begin(), buf_.end() - PKT_SIZE); }
 
   if (xor_checksum(buf_.data(), CHECK_IDX) != buf_[CHECK_IDX]) {
@@ -97,6 +103,51 @@ void SpresenseImuNode::processByte(uint8_t byte)
 
   float acc[3] = { p.ax, p.ay, p.az };
   float gyr[3] = { p.gx, p.gy, p.gz };
+
+  /* --- Gyro bias correction processing --- */
+  if (gyro_bias_correction_ && !bias_computed_) {
+    gyro_sum_[0] += gyr[0];
+    gyro_sum_[1] += gyr[1];
+    gyro_sum_[2] += gyr[2];
+
+    min_gyro_[0] = std::min(min_gyro_[0], (double)gyr[0]);
+    min_gyro_[1] = std::min(min_gyro_[1], (double)gyr[1]);
+    min_gyro_[2] = std::min(min_gyro_[2], (double)gyr[2]);
+
+    max_gyro_[0] = std::max(max_gyro_[0], (double)gyr[0]);
+    max_gyro_[1] = std::max(max_gyro_[1], (double)gyr[1]);
+    max_gyro_[2] = std::max(max_gyro_[2], (double)gyr[2]);
+
+    samples_received_++;
+    if (samples_received_ % 100 == 0) {
+      RCLCPP_INFO(this->get_logger(), "Bias collection progress: %d / %d",
+                  samples_received_, sample_count_);
+    }
+
+    if (samples_received_ >= sample_count_) {
+      gyro_bias_[0] = gyro_sum_[0] / sample_count_;
+      gyro_bias_[1] = gyro_sum_[1] / sample_count_;
+      gyro_bias_[2] = gyro_sum_[2] / sample_count_;
+      bias_computed_ = true;
+
+      RCLCPP_INFO(this->get_logger(), "=== Gyro Bias Estimation Complete ===");
+      RCLCPP_INFO(this->get_logger(), "gx: avg=%+.5f, min=%+.5f, max=%+.5f",
+                  gyro_bias_[0], min_gyro_[0], max_gyro_[0]);
+      RCLCPP_INFO(this->get_logger(), "gy: avg=%+.5f, min=%+.5f, max=%+.5f",
+                  gyro_bias_[1], min_gyro_[1], max_gyro_[1]);
+      RCLCPP_INFO(this->get_logger(), "gz: avg=%+.5f, min=%+.5f, max=%+.5f",
+                  gyro_bias_[2], min_gyro_[2], max_gyro_[2]);
+    }
+
+    buf_.clear();
+    return;
+  }
+
+  if (bias_computed_) {
+    gyr[0] -= gyro_bias_[0];
+    gyr[1] -= gyro_bias_[1];
+    gyr[2] -= gyro_bias_[2];
+  }
 
   publishImu(acc, gyr);
   buf_.clear();
