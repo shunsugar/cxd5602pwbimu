@@ -23,7 +23,7 @@ public:
   ImuBiasCorrectorNode() : Node("gyrobias_corrector_node")
   {
     // パラメータ宣言
-    declare_parameter("input_topic", "/imu/spresense");
+    declare_parameter("input_topic", "/imu/spresense/data_raw");
     declare_parameter("output_topic", "/imu/spresense/gyrobias");
     declare_parameter("gyro_bias_x",  0.00005);
     declare_parameter("gyro_bias_y", -0.00026);

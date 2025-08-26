@@ -67,6 +67,8 @@
     <param name="imu_topic" value="/imu/spresense"/>
     <param name="time_out" value="10.0"/>
     <param name="baudrate" value="921600"/>
+    <param name="gyro_bias_correction" value="true"/>
+    <param name="gyro_bias_samples" value="2400"/>
   </node>
 
   <!-- GPSposition_publisher -->

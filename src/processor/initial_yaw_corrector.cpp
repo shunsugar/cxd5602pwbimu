@@ -26,7 +26,7 @@ public:
   ImuYawCorrectorNode() : Node("imu_initial_yaw_corrector")
   {
     declare_parameter("input_topic", "/imu");
-    declare_parameter("output_topic", "/imu/fixed");
+    declare_parameter("output_topic", "/imu/inityaw");
 
     get_parameter("input_topic", input_topic_);
     get_parameter("output_topic", output_topic_);
