@@ -6,7 +6,7 @@
   <arg name="frame_id" default="imu_link"/>
   <arg name="imu_topic" default="/imu/spresense"/>
   <arg name="time_out" default="10.0"/>
-  <arg name="baudrate" default="921600"/>
+  <arg name="baudrate" default="460800"/>
   <arg name="gyro_bias_correction" default="true"/>
   <arg name="gyro_bias_samples" default="2400"/>
 
