@@ -21,14 +21,14 @@
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="spimu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu/data"/>
-    <param name="output_topic" value="/imu/spresense/fixed"/>
+    <param name="output_topic" value="/imu/spresense/inityaw"/>
   </node>
 
   <!-- wheel_imu_odom for spresense imu -->
   <node pkg="cxd5602pwbimu" exec="wheel_spimu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="odom_topic" value="/odom"/>
-    <param name="imu_topic" value="/imu/spresense/fixed"/>
+    <param name="imu_topic" value="/imu/spresense/inityaw"/>
     <param name="publish_TF" value="false"/>
   </node>
 
@@ -36,14 +36,14 @@
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="imu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu"/>
-    <param name="output_topic" value="/imu/fixed"/>
+    <param name="output_topic" value="/imu/inityaw"/>
   </node>
 
   <!-- wheel_imu_odom for imu -->
   <node pkg="orange_sensor_tools" exec="wheel_imu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="odom_topic" value="/odom"/>
-    <param name="imu_topic" value="/imu/fixed"/>
+    <param name="imu_topic" value="/imu/inityaw"/>
     <param name="publish_TF" value="false"/>
   </node>
 
