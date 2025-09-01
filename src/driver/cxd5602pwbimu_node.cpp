@@ -27,7 +27,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
   declare_parameter("baudrate",  460800);
 
   declare_parameter("gyro_bias_correction", true);
-  declare_parameter("gyro_bias_samples",    2400);
+  declare_parameter("gyro_bias_samples",    4800);
 
   get_parameter("port",      port_);
   get_parameter("frame_id",  frame_id_);
@@ -119,7 +119,7 @@ void SpresenseImuNode::processByte(uint8_t byte)
     max_gyro_[2] = std::max(max_gyro_[2], (double)gyr[2]);
 
     samples_received_++;
-    if (samples_received_ % 100 == 0) {
+    if (samples_received_ % 1000 == 0) {
       RCLCPP_INFO(this->get_logger(), "Bias collection progress: %d / %d",
                   samples_received_, sample_count_);
     }
