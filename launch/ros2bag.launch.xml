@@ -5,25 +5,23 @@
   <arg name="livox_points_topic" default="/livox_points"/>
   <arg name="xacro_file_path" default="$(find-pkg-share orange_description)/xacro/orange_robot.xacro"/>
 
-  <!-- gyrobias corrector -->
+  <!-- gyrobias corrector
   <node pkg="cxd5602pwbimu" exec="gyrobias_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
-  </node>
-
+  </node> -->
   <!-- madgwick filter node -->
   <node pkg="imu_filter_madgwick" exec="imu_filter_madgwick_node" name="madgwick_filter">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param from="$(find-pkg-share cxd5602pwbimu)/config/madgwick.yaml"/>
-    <remap from="/imu/data_raw" to="/imu/spresense/gyrobias"/>
+    <remap from="/imu/data_raw" to="/imu/spresense"/>
+    <remap from="/imu/data" to="/imu/spresense/madgwick"/>
   </node>
-
   <!-- initial_yaw_corrector -->
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="spimu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
-    <param name="input_topic" value="/imu/data"/>
+    <param name="input_topic" value="/imu/spresense/madgwick"/>
     <param name="output_topic" value="/imu/spresense/inityaw"/>
   </node>
-
   <!-- wheel_imu_odom for spresense imu -->
   <node pkg="cxd5602pwbimu" exec="wheel_spimu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
@@ -38,7 +36,6 @@
     <param name="input_topic" value="/imu"/>
     <param name="output_topic" value="/imu/inityaw"/>
   </node>
-
   <!-- wheel_imu_odom for imu -->
   <node pkg="orange_sensor_tools" exec="wheel_imu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
@@ -47,12 +44,21 @@
     <param name="publish_TF" value="false"/>
   </node>
 
+  <!-- GPSposition converter
+  <node pkg="orange_gnss" exec="lonlat_to_odom" output="screen">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <param name="Position_magnification" value="1.675"/>
+  </node> -->
+  <!-- combination_GPSposition_GPSheading
+  <node pkg="orange_gnss" exec="combination" output="screen">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node> -->
+
   <!-- livox_to_pointcloud2 -->
   <node pkg="livox_to_pointcloud2" exec="livox_to_pointcloud2_node">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <remap from="/livox_pointcloud" to="/livox/lidar"/>
   </node>
-
   <!-- pointcloud2_to_laserscan -->
   <include file="$(find-pkg-share orange_sensor_tools)/launch/livox_to_pointcloud2_laserscan.launch.py">
     <arg name="use_sim_time" value="$(var use_sim_time)"/>
