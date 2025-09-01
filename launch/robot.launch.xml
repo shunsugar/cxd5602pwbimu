@@ -64,11 +64,11 @@
   <node pkg="cxd5602pwbimu" exec="cxd5602pwbimu_node">
     <param name="port" value="/dev/sensors/spresense_imu"/>
     <param name="frame_id" value="imu_link"/>
-    <param name="imu_topic" value="/imu/spresense/data_raw"/>
+    <param name="imu_topic" value="/imu/spresense"/>
     <param name="time_out" value="10.0"/>
     <param name="baudrate" value="460800"/>
     <param name="gyro_bias_correction" value="true"/>
-    <param name="gyro_bias_samples" value="2400"/>
+    <param name="gyro_bias_samples" value="4800"/>
   </node>
 
   <!-- GPSposition_publisher -->
