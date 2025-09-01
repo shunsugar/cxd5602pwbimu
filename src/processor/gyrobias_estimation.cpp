@@ -25,7 +25,7 @@ class GyroBiasEstimator : public rclcpp::Node
 public:
   GyroBiasEstimator() : Node("gyro_bias_estimator")
   {
-    declare_parameter("imu_topic", "/imu/spresense/data_raw");
+    declare_parameter("imu_topic", "/imu/spresense");
     declare_parameter("sample_count", 1920);
 
     get_parameter("imu_topic", imu_topic_);
