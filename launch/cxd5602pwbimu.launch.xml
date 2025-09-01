@@ -8,7 +8,7 @@
   <arg name="time_out" default="10.0"/>
   <arg name="baudrate" default="460800"/>
   <arg name="gyro_bias_correction" default="true"/>
-  <arg name="gyro_bias_samples" default="2400"/>
+  <arg name="gyro_bias_samples" default="4800"/>
 
   <!-- spresense imu node -->
   <node pkg="cxd5602pwbimu" exec="cxd5602pwbimu_node">
