@@ -4,4 +4,4 @@ madgwick_filter:
     publish_tf:   true
     world_frame:  enu       # enu nwu
     frequency:    480.0     # Hz
-    beta:         0.05
+    beta:         0.05      # 0.05
