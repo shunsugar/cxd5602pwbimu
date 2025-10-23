@@ -8,7 +8,7 @@ Panels:
         - /odom1/Shape1
         - /odom/wheel_imu1/Shape1
         - /odom/wheel_spimu1/Shape1
-        - /fusion/odom1/Shape1
+        - /odom/gnss1/Shape1
       Splitter Ratio: 0.570588231086731
     Tree Height: 914
   - Class: rviz_common/Selection
@@ -360,15 +360,15 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: false
-      Enabled: false
-      Keep: 1
-      Name: fusion/odom
+      Enabled: true
+      Keep: 10000
+      Name: odom/gnss
       Position Tolerance: 0.10000000149011612
       Shape:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.10000000149011612
-        Color: 255; 25; 0
+        Color: 28; 113; 216
         Head Length: 0.30000001192092896
         Head Radius: 0.10000000149011612
         Shaft Length: 1
@@ -381,7 +381,7 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /fusion/odom
-      Value: false
+      Value: true
     - Alpha: 0.699999988079071
       Class: rviz_default_plugins/Map
       Color Scheme: map
