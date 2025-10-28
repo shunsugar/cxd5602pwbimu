@@ -9,17 +9,23 @@
   <node pkg="cxd5602pwbimu" exec="gyrobias_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
   </node> -->
-  <!-- madgwick filter node -->
+  <!-- madgwick filter node
   <node pkg="imu_filter_madgwick" exec="imu_filter_madgwick_node" name="madgwick_filter">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param from="$(find-pkg-share cxd5602pwbimu)/config/madgwick.yaml"/>
     <remap from="/imu/data_raw" to="/imu/spresense"/>
     <remap from="/imu/data" to="/imu/spresense/madgwick"/>
-  </node>
-  <!-- initial_yaw_corrector -->
+  </node> -->
+  <!-- initial yaw corrector
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="spimu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu/spresense/madgwick"/>
+    <param name="output_topic" value="/imu/spresense/inityaw"/>
+  </node> -->
+  <!-- quat attitude estimator -->
+  <node pkg="cxd5602pwbimu" exec="quat_attitude_estimator">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <param name="input_topic" value="/imu/spresense"/>
     <param name="output_topic" value="/imu/spresense/inityaw"/>
   </node>
   <!-- wheel_imu_odom for spresense imu -->
@@ -30,7 +36,7 @@
     <param name="publish_TF" value="false"/>
   </node>
 
-  <!-- initial_yaw_corrector -->
+  <!-- initial yaw corrector -->
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="imu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu"/>
@@ -54,9 +60,17 @@
     <param name="use_sim_time" value="$(var use_sim_time)"/>
   </node>
   <!-- ekf_myself -->
-  <node pkg="orange_gnss" exec="ekf_myself" output="screen">
+  <!--<node pkg="orange_gnss" exec="ekf_myself" output="screen">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <param name="ekf_publish_TF" value="false"/>
+  </node> -->
+  <node pkg="try_navigation" exec="ekf_myself_gps" output="screen">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="ekf_publish_TF" value="false"/>
   </node>
+  <!--<node pkg="cxd5602pwbimu" exec="ekf_myself">
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node> -->
 
   <!-- livox_to_pointcloud2
   <node pkg="livox_to_pointcloud2" exec="livox_to_pointcloud2_node">

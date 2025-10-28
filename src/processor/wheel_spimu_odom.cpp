@@ -96,6 +96,7 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   }
 
   // Determine position.z update by pitch difference
+  /*
   double delta_pitch = pitch_ - baseline_pitch_;
   if (delta_pitch < -pitch_diff_th_)
   {
@@ -105,6 +106,7 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   {
     position_z_ -= dx * sin(delta_pitch);
   }
+  */
 
   // Construct TF
   if (publish_TF_)
@@ -115,7 +117,7 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     t.child_frame_id = TF_child_frame_;
     t.transform.translation.x = position_x_;
     t.transform.translation.y = position_y_;
-    t.transform.translation.z = position_z_;
+    t.transform.translation.z = 0.0;
     t.transform.rotation.x = orientation_x_;
     t.transform.rotation.y = orientation_y_;
     t.transform.rotation.z = orientation_z_;
@@ -132,7 +134,7 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     fused_msg.child_frame_id = odom_child_frame_;
     fused_msg.pose.pose.position.x = position_x_;
     fused_msg.pose.pose.position.y = position_y_;
-    fused_msg.pose.pose.position.z = position_z_;
+    fused_msg.pose.pose.position.z = 0.0;
     fused_msg.pose.pose.orientation.x = orientation_x_;
     fused_msg.pose.pose.orientation.y = orientation_y_;
     fused_msg.pose.pose.orientation.z = orientation_z_;
