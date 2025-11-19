@@ -22,21 +22,18 @@ class ImuBiasCorrectorNode : public rclcpp::Node
 public:
   ImuBiasCorrectorNode() : Node("gyrobias_corrector_node")
   {
-    // パラメータ宣言
     declare_parameter("input_topic", "/imu/spresense");
     declare_parameter("output_topic", "/imu/spresense/gyrobias");
     declare_parameter("gyro_bias_x", -0.00008);
     declare_parameter("gyro_bias_y", -0.00007);
     declare_parameter("gyro_bias_z", -0.00022);
 
-    // パラメータ取得
     get_parameter("input_topic", input_topic_);
     get_parameter("output_topic", output_topic_);
     get_parameter("gyro_bias_x", bias_x_);
     get_parameter("gyro_bias_y", bias_y_);
     get_parameter("gyro_bias_z", bias_z_);
 
-    // 購読とパブリッシュ
     sub_ = create_subscription<sensor_msgs::msg::Imu>(
       input_topic_, 10,
       std::bind(&ImuBiasCorrectorNode::callback, this, std::placeholders::_1));

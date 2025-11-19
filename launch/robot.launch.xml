@@ -14,16 +14,16 @@
   <arg name="xacro_file_path" default="$(find-pkg-share orange_description)/xacro/orange_robot.xacro"/>
   <arg name="motor_driver_config_file_path" default="$(find-pkg-share orange_bringup)/config/motor_driver_params.yaml"/>
 
-  <!-- robot_state_publisher -->
+  <!-- robot state publisher -->
   <node pkg="robot_state_publisher" exec="robot_state_publisher">
     <param name="robot_description" value="$(command 'xacro $(var xacro_file_path)')"/>
   </node>
-  <!-- joint_state_publisher -->
+  <!-- joint state publisher -->
   <node pkg="joint_state_publisher" exec="joint_state_publisher">
     <param name="robot_description" value="$(command 'xacro $(var xacro_file_path)')"/>
   </node>
 
-  <!-- motor_driver_node -->
+  <!-- motor driver node -->
   <node pkg="orange_bringup" exec="motor_driver_node" output="screen">
     <param from="$(var motor_driver_config_file_path)"/>
     <param name="port" value="/dev/ZLAC8015D"/>
@@ -71,9 +71,9 @@
     <param name="gyro_bias_samples" value="4800"/>
   </node>
 
-  <!-- GPSposition_publisher -->
+  <!-- GPSposition publisher -->
   <!-- initial heading:housei nakaniwa=179.169287 tsukuba= 276.5 -->
-  <!-- GPSheading_publisher 
+  <!-- GPSheading publisher 
   <node pkg="orange_gnss" exec="gnss_odom_movingbase_fix_publisher_ttyUSB" output="screen">
     <param name="port" value="/dev/sensors/GNSS_UM982"/>
     <param name="baud" value="115200"/>

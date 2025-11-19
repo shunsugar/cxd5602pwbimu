@@ -22,7 +22,7 @@ SpresenseImuNode::SpresenseImuNode() : rclcpp::Node("spresense_imu_node")
 {
   declare_parameter("port",      "/dev/sensors/spresense_imu");
   declare_parameter("frame_id",  "imu_link");
-  declare_parameter("imu_topic", "/imu/spresense/data_raw");
+  declare_parameter("imu_topic", "/imu/spresense");
   declare_parameter("time_out",  10.0);
   declare_parameter("baudrate",  460800);
 

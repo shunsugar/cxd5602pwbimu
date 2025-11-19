@@ -77,7 +77,7 @@ private:
       RCLCPP_INFO(get_logger(), "gy: avg=%+.5f, min=%+.5f, max=%+.5f", bias[1], min_gyro_[1], max_gyro_[1]);
       RCLCPP_INFO(get_logger(), "gz: avg=%+.5f, min=%+.5f, max=%+.5f", bias[2], min_gyro_[2], max_gyro_[2]);
 
-      rclcpp::shutdown();  // 自動終了
+      rclcpp::shutdown();
     }
   }
 

@@ -7,14 +7,14 @@
   <arg name="livox_points_topic" default="/livox_points"/>
   <arg name="xacro_file_path" default="$(find-pkg-share orange_description)/xacro/orange_robot.xacro"/>
 
-  <!-- robot_localization -->
+  <!-- robot localization -->
   <!--<include file="$(find-pkg-share orange_sensor_tools)/launch/localization.launch.xml">
     <arg name="odom_in" value="$(var odom_topic)"/>
     <arg name="imu_in" value="$(var imu_topic)"/>
     <arg name="fusion_odom_out" value="$(var fusion_odom_topic)"/>
   </include>-->
 
-  <!-- wheel_imu_odom 
+  <!-- wheel imu odom 
   <include file="$(find-pkg-share orange_sensor_tools)/launch/wheel_imu_odom.launch.xml">
     <arg name="odom_topic" value="/odom"/>
     <arg name="imu_topic" value="/imu"/>
@@ -26,25 +26,25 @@
     <remap from="/imu/data_raw" to="/imu/spresense"/>
     <remap from="/imu/data" to="/imu/spresense/madgwick"/>
   </node>
-  <!-- initial_yaw_corrector -->
+  <!-- initial yaw corrector -->
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="spimu_yaw_corrector">
     <param name="input_topic" value="/imu/spresense/madgwick"/>
     <param name="output_topic" value="/imu/spresense/inityaw"/>
   </node>
-  <!-- wheel_imu_odom for spresense imu -->
+  <!-- wheel imu odom for spresense imu -->
   <node pkg="cxd5602pwbimu" exec="wheel_spimu_odom">
     <param name="odom_topic" value="/odom"/>
     <param name="imu_topic" value="/imu/spresense/inityaw"/>
     <param name="publish_TF" value="false"/>
   </node>
 
-  <!-- livox_to_pointcloud2 -->
+  <!-- livox to pointcloud2 -->
   <node pkg="livox_to_pointcloud2" exec="livox_to_pointcloud2_node">
     <remap from="/livox_pointcloud" to="/livox/lidar"/>
   </node>
-  <!-- ground_segmentation2 
+  <!-- ground segmentation2 
   <include file="$(find-pkg-share pcd_convert)/launch/pcd_convert.launch.py"/>-->
-  <!-- pointcloud2_to_laserscan -->
+  <!-- pointcloud2 to laserscan -->
   <include file="$(find-pkg-share orange_sensor_tools)/launch/livox_to_pointcloud2_laserscan.launch.py">
     <arg name="cloud_in" value="/converted_pointcloud2"/>
     <arg name="scan_out" value="$(var livox_scan_topic)"/>
