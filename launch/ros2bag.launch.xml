@@ -16,7 +16,7 @@
     <remap from="/imu/data_raw" to="/imu/spresense"/>
     <remap from="/imu/data" to="/imu/spresense/madgwick"/>
   </node> -->
-  <!-- initial yaw corrector
+  <!--initial yaw corrector
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="spimu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu/spresense/madgwick"/>
@@ -29,26 +29,27 @@
     <param name="output_topic" value="/imu/spresense/inityaw"/>
   </node>
   <!-- wheel_imu_odom for spresense imu -->
-  <node pkg="cxd5602pwbimu" exec="wheel_spimu_odom">
+  <node pkg="cxd5602pwbimu" exec="wheel_spimu_odom" name="quat_spimu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="odom_topic" value="/odom"/>
     <param name="imu_topic" value="/imu/spresense/inityaw"/>
+    <param name="fused_odom_topic" value="/odom/wheel_spimu"/>
     <param name="publish_TF" value="false"/>
   </node>
 
-  <!-- initial yaw corrector -->
+  <!-- initial yaw corrector
   <node pkg="cxd5602pwbimu" exec="initial_yaw_corrector" name="imu_yaw_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="input_topic" value="/imu"/>
     <param name="output_topic" value="/imu/inityaw"/>
-  </node>
-  <!-- wheel_imu_odom for imu -->
+  </node> -->
+  <!-- wheel_imu_odom for imu
   <node pkg="orange_sensor_tools" exec="wheel_imu_odom">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="odom_topic" value="/odom"/>
     <param name="imu_topic" value="/imu/inityaw"/>
     <param name="publish_TF" value="false"/>
-  </node>
+  </node> -->
 
   <!-- GPSposition converter -->
   <node pkg="orange_gnss" exec="lonlat_to_odom" output="screen">
@@ -59,18 +60,18 @@
   <node pkg="orange_gnss" exec="combination" output="screen">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
   </node>
-  <!-- ekf_myself -->
-  <!--<node pkg="orange_gnss" exec="ekf_myself" output="screen">
+  <!--initial xy corrector
+  <node pkg="cxd5602pwbimu" exec="initial_xy_corrector">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
-    <param name="ekf_publish_TF" value="false"/>
+    <param name="input_topic" value="/odom/UM982"/>
+    <param name="output_topic" value="/odom/UM982/initxy"/>
   </node> -->
+
+  <!-- ekf_myself -->
   <node pkg="try_navigation" exec="ekf_myself_gps" output="screen">
     <param name="use_sim_time" value="$(var use_sim_time)"/>
     <param name="ekf_publish_TF" value="false"/>
   </node>
-  <!--<node pkg="cxd5602pwbimu" exec="ekf_myself">
-    <param name="use_sim_time" value="$(var use_sim_time)"/>
-  </node> -->
 
   <!-- livox_to_pointcloud2
   <node pkg="livox_to_pointcloud2" exec="livox_to_pointcloud2_node">
