@@ -82,7 +82,6 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   double dt = (current_time - prev_time_).seconds();
   prev_time_ = current_time;
 
-  // Calculate position
   double dx = msg->twist.twist.linear.x * dt * scale_factor_;  // best: 0.45
   position_x_ += dx * cos(yaw_);
   position_y_ += dx * sin(yaw_);
@@ -108,7 +107,6 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
   }
   */
 
-  // Construct TF
   if (publish_TF_)
   {
     geometry_msgs::msg::TransformStamped t;
@@ -125,7 +123,6 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     tf_broadcaster_->sendTransform(t);
   }
 
-  // Construct Odom message
   if (publish_odom_)
   {
     nav_msgs::msg::Odometry fused_msg;
@@ -147,7 +144,6 @@ void OdomFusionNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
     fused_odom_pub_->publish(fused_msg);
   }
 
-  // Debugging Feature
   if (debug_)
   {
     RCLCPP_INFO(this->get_logger(), "x: %f, y: %f, z: %f, pitch: %f, yaw: %f",
